@@ -1,113 +1,114 @@
-import Image from 'next/image'
+"use client"
+import React, { useState } from 'react';
 
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+const Page = () => {
+  const [title, setTitle] = useState('');
+  const [des, setDes] = useState('');
+  const [maintask, setMainTask] = useState([]);
+  const [editingIndex, setEditingIndex] = useState(-1);
+  const [editTitle, setEditTitle] = useState(''); // Track edited task's title
+  const [editDes, setEditDes] = useState(''); // Track edited task's description
+
+  const submitHandle = (e) => {
+    e.preventDefault();
+    setMainTask([...maintask, { title, des }]);
+    setTitle('');
+    setDes('');
+  };
+
+  const deleteTask = (i) => {
+    const copyTask = [...maintask];
+    copyTask.splice(i, 1);
+    setMainTask(copyTask);
+  };
+
+  const editTask = (i) => {
+    setEditingIndex(i);
+    setEditTitle(maintask[i].title);
+    setEditDes(maintask[i].des); 
+  };
+
+  const saveTask = (i) => {
+    const copyTask = [...maintask];
+    copyTask[i] = { title: editTitle, des: editDes }; // Update task with edited title and description
+    setMainTask(copyTask);
+    setEditingIndex(-1);
+    setEditTitle(''); // Reset edited title
+    setEditDes(''); // Reset edited description
+  };
+
+  let renderTask = <h2>No task available</h2>;
+
+  if (maintask.length > 0) {
+    renderTask = maintask.map((t, i) => (
+      <li key={i} className='mb-4 flex justify-between'>
+        <div className='flex justify-between items-center mb-5 w-2/3'>
+          {editingIndex === i ? (
+            <>
+              <input
+                type='text'
+                className='text-xl font-semibold'
+                value={editTitle} // Use edited title
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+              <input
+                type='text'
+                className='text-lg font-medium'
+                value={editDes} // Use edited description
+                onChange={(e) => setEditDes(e.target.value)}
+              />
+            </>
+          ) : (
+            <>
+              <h5 className='text-xl font-semibold'>{t.title}</h5>
+              <h6 className='text-lg font-medium'>{t.des}</h6>
+            </>
+          )}
         </div>
-      </div>
+        {editingIndex === i ? (
+          <button onClick={() => saveTask(i)} className='bg-blue-600 text-white px-4 py-2 rounded font-bold'>
+            Save
+          </button>
+        ) : (
+          <button onClick={() => editTask(i)} className='bg-green-600 text-white px-4 py-2 rounded font-bold'>
+            Edit
+          </button>
+        )}
+        <button onClick={() => deleteTask(i)} className='bg-red-600 text-white px-4 py-2 rounded font-bold'>
+          Delete
+        </button>
+      </li>
+    ));
+  }
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+  return (
+    <>
+      <h1 className='bg-black text-white font-bold text-center p-5 text-5xl'>Todo list</h1>
+      <form onSubmit={submitHandle}>
+        <input
+          type='text'
+          required
+          className='text-2xl border-zinc-950 border-2 m-8 px-4 py-2'
+          placeholder='Enter Task here'
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
+        <input
+          type='text'
+          className='text-2xl border-zinc-950 border-2 m-8 px-4 py-2'
+          placeholder='Description here'
+          value={des}
+          required
+          onChange={(e) => setDes(e.target.value)}
+        />
+        <button className='bg-black text-white px-4 py-3 text-2xl font-bold rounded m-5'>Enter</button>
+      </form>
+      <hr />
+      <div className='p-8 bg-slate-200'>
+        <ul>{renderTask}</ul>
       </div>
+    </>
+  );
+};
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+export default Page;
